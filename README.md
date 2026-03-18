@@ -78,7 +78,53 @@ docker run -p 8080:8080 \
   -e PORT=8080 \
   -e RATE_LIMIT=120 \
   -e ALLOWED_ORIGINS="https://myapp.com,https://staging.myapp.com" \
-  cors-proxy-rs
+  ghcr.io/7a6163/cors-proxy-rs
+```
+
+### Docker Compose
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  cors-proxy:
+    image: ghcr.io/7a6163/cors-proxy-rs:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - RATE_LIMIT=60
+      - ALLOWED_ORIGINS=https://myapp.com,https://staging.myapp.com
+      - BLOCK_PRIVATE_IPS=true
+      - TIMEOUT_SECS=30
+    restart: unless-stopped
+```
+
+Then run:
+
+```bash
+docker compose up -d
+```
+
+You can also use it alongside your frontend app:
+
+```yaml
+services:
+  cors-proxy:
+    image: ghcr.io/7a6163/cors-proxy-rs:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:5173
+      - RATE_LIMIT=120
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - cors-proxy
 ```
 
 ## Security
